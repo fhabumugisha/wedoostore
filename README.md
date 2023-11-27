@@ -1,11 +1,8 @@
 # jobs
 If you want to join our engineering team, you will most likely have to complete one of our challenges:
 
-* [Backend challenge](https://gitlab.com/wedoogift-jobs/challenge/-/tree/master/backend)
-* [Frontend challenge](https://gitlab.com/wedoogift-jobs/challenge/-/tree/master/frontend)
-* [DevOps challenge](https://gitlab.com/wedoogift-jobs/challenge/-/tree/master/devops)
-* [React challenge](https://gitlab.com/wedoogift-jobs/challenge/-/tree/master/react)
-* [Data challenge](https://gitlab.com/wedoogift-jobs/challenge/-/tree/master/data)
+* [Backend challenge](https://github.com/fhabumugisha/wedoostore/tree/main/backend)
+* [Frontend challenge](https://github.com/fhabumugisha/wedoostore/tree/main/frontend)
 
 In order to know more about opened positions on [Glady](https://www.glady.com/), you can check out this [page](https://jobs.glady.com).
 
