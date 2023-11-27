@@ -26,7 +26,7 @@ Gift deposits has 365 days lifespan, beyond this period it will no longer be cou
 
 example:
 John receives a Gift distribution with the amount of $100 euros from Tesla. he will therefore have $100 in gift cards in his account.
-He received it on 06/15/2021. The gift distribution will expire on 06/14/2022. 
+He received it on 06/15/2021. The gift distribution will expire on 06/14/2022.
 
 ### Meal deposits
 Meal deposit works like the Gift deposit excepting for the end date. In fact meal deposits expires at the end of February of the year following the distribution date.
