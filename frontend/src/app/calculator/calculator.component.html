@@ -1,7 +1,38 @@
 <div class="container">
   <form [formGroup]="calculatorForm" (ngSubmit)="calculate()">
-    <label>Saisir le montant</label>
+    <label>Montant désiré:</label>
     <input id="name" type="text" formControlName="amount">
     <button type="submit" [disabled]="!calculatorForm.valid">Valider</button>
   </form>
+
+  <div>
+    <button  class="card-item" type="button" title="Previous amount"  (click)="getPrevious()">-  </button>
+    <button  class="card-item" type="button" title="next amount"  (click)="getNext()">+  </button>
+  </div>
+</div>
+
+<div class="container">
+
+  <ng-container *ngIf="availableCards && !showNextValue" >
+    <h2 style="color: darkgreen">Votre montant est composé des cartes suivantes :</h2>
+    <ul class="card-list" *ngFor="let card of availableCards!.cards">
+      <li class="card-item">
+        {{ card }} €
+
+      </li>
+    </ul>
+  </ng-container>
+
+  <ng-container *ngIf="showNextValue">
+    <h2 style="color: salmon">Le montant saisi n'est pas disponible, Veullez choisir un autre montant ci-desous :</h2>
+    <ul class="card-list" >
+      <li class="card-item" >
+         <button type="button" (click)="setValue(ceilValue)">{{ ceilValue }} € </button>
+      </li>
+      <li class="card-item" >
+     <button type="button" (click)="setValue(floorValue)">   {{ floorValue }} € </button>
+      </li>
+    </ul>
+  </ng-container>
+
 </div>
