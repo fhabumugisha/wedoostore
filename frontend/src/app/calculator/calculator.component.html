@@ -1,0 +1,7 @@
+<div class="container">
+  <form [formGroup]="calculatorForm" (ngSubmit)="calculate()">
+    <label>Saisir le montant</label>
+    <input id="name" type="text" formControlName="amount">
+    <button type="submit" [disabled]="!calculatorForm.valid">Valider</button>
+  </form>
+</div>
