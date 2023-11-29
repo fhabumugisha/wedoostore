@@ -5,6 +5,7 @@ import com.wedogift.backend.entities.CompanyEntity;
 import com.wedogift.backend.entities.DepositEntity;
 import com.wedogift.backend.entities.UserEntity;
 import com.wedogift.backend.exceptions.CompanyNonFoundException;
+import com.wedogift.backend.exceptions.DuplicateResourceException;
 import com.wedogift.backend.exceptions.NotEnoughBalanceException;
 import com.wedogift.backend.mappers.CompaniesMapper;
 import com.wedogift.backend.mappers.UsersMapper;
@@ -63,6 +64,24 @@ class CompaniesServiceImplTest {
         verify(companiesRepo, times(1)).save(ArgumentMatchers.any(CompanyEntity.class));
 
         assertNotNull(companyId);
+    }
+
+    @Test
+    void addCompany_WithExistingEmail_ShouldThrowException() {
+        //Given
+        
+        String expectedErrorMessage = "Email already taken";
+        String email = "company@wedoostore.com";
+        AddCompanyDto addCompanyDto = AddCompanyDto.builder().email(email).name("Glady").build();
+
+        //When
+        when(companiesRepo.findByEmail(email)).thenReturn(Optional.of(CompanyEntity.builder().build()));
+        // Execute
+        DuplicateResourceException exception = assertThrows(DuplicateResourceException.class,
+                () -> companiesService.addCompany(addCompanyDto));
+
+        // Then
+        assertEquals(expectedErrorMessage, exception.getMessage());
     }
 
     @Test
