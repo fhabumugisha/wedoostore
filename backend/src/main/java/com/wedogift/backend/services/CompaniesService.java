@@ -35,53 +35,53 @@ public interface CompaniesService extends UserDetailsService {
     DisplayCompanyDto getCompany(UUID companyId);
 
     /**
-     * Adds a new user to a company
+     * Adds a new employee to a company
      *
-     * @param companyId the id of the company
-     * @param addUser   the user to add
+     * @param companyId   the id of the company
+     * @param addEmployee the employee to add
      */
-    void addUserToCompany(UUID companyId, AddUserDto addUser);
+    void addEmployeeToCompany(UUID companyId, AddEmployeeDto addEmployee);
 
     /**
-     * Get all users of a company
+     * Get all employees of a company
      *
      * @param companyId the id to the company
-     * @return list of {@link  DisplayUserDto}
+     * @return list of {@link  DisplayEmployeeDto}
      */
 
-    List<DisplayUserDto> getCompanyUsers(UUID companyId);
+    List<DisplayEmployeeDto> getCompanyEmplyees(UUID companyId);
 
 
     /**
-     * Get a  user by id
+     * Get an  employee by id
      *
-     * @param companyId the id to the company
-     * @param userId    the id of the user to read
-     * @return list of {@link  DisplayUserDto}
+     * @param companyId  the id to the company
+     * @param employeeId the id of the employee to read
+     * @return list of {@link  DisplayEmployeeDto}
      */
 
-    DisplayUserDto getCompanyUser(UUID companyId, UUID userId);
+    DisplayEmployeeDto getCompanyEmployee(UUID companyId, UUID employeeId);
 
     /**
      * Make a deposit
      *
      * @param companyId         the id to the company  which makes deposit
-     * @param userId            the id of the user who receive the deposit
+     * @param employeeId        the id of the employee who receive the deposit
      * @param depositBalanceDto the value of deposit {@link DepositBalanceDto}
      */
-    void depositBalanceToUser(UUID companyId, UUID userId, DepositBalanceDto depositBalanceDto);
+    void depositBalanceToEmployee(UUID companyId, UUID employeeId, DepositBalanceDto depositBalanceDto);
 
 
     /**
-     * Returns the user balance
+     * Returns the employee balance
      *
-     * @param companyId the id to the company of the user
-     * @param userId    the id of the user
-     * @return the user's balance
+     * @param companyId  the id to the company of the employee
+     * @param employeeId the id of the employee
+     * @return the employee's balance
      */
-    GetBalanceDto getUserBalance(UUID companyId, UUID userId);
+    GetBalanceDto getEmployeeBalance(UUID companyId, UUID employeeId);
 
-    UserDetails loadUserByUsername(String username);
+    UserDetails loadUserByUsername(String employeename);
 
 
 }

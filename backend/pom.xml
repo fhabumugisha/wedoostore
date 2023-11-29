@@ -103,7 +103,13 @@
             <version>${jsonwebtoken.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.c4-soft.springaddons</groupId>
+            <artifactId>spring-addons-oauth2-test</artifactId>
+            <version>7.1.16</version>
+        </dependency>
 
+       
     </dependencies>
 
     <build>

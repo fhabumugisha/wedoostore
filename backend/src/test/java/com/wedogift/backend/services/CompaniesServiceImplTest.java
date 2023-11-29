@@ -3,14 +3,14 @@ package com.wedogift.backend.services;
 import com.wedogift.backend.dtos.*;
 import com.wedogift.backend.entities.CompanyEntity;
 import com.wedogift.backend.entities.DepositEntity;
-import com.wedogift.backend.entities.UserEntity;
-import com.wedogift.backend.exceptions.CompanyNonFoundException;
+import com.wedogift.backend.entities.EmployeeEntity;
 import com.wedogift.backend.exceptions.DuplicateResourceException;
 import com.wedogift.backend.exceptions.NotEnoughBalanceException;
+import com.wedogift.backend.exceptions.ResourceNotFoundException;
 import com.wedogift.backend.mappers.CompaniesMapper;
-import com.wedogift.backend.mappers.UsersMapper;
+import com.wedogift.backend.mappers.EmployeesMapper;
 import com.wedogift.backend.repos.CompaniesRepo;
-import com.wedogift.backend.repos.UsersRepo;
+import com.wedogift.backend.repos.EmployeesRepo;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
@@ -34,9 +34,9 @@ class CompaniesServiceImplTest {
     @Mock
     private CompaniesMapper companiesMapper;
     @Mock
-    private UsersMapper usersMapper;
+    private EmployeesMapper employeesMapper;
     @Mock
-    private UsersRepo usersRepo;
+    private EmployeesRepo employeesRepo;
 
     @Mock
     private CompaniesRepo companiesRepo;
@@ -69,7 +69,7 @@ class CompaniesServiceImplTest {
     @Test
     void addCompany_WithExistingEmail_ShouldThrowException() {
         //Given
-        
+
         String expectedErrorMessage = "Email already taken";
         String email = "company@wedoostore.com";
         AddCompanyDto addCompanyDto = AddCompanyDto.builder().email(email).name("Glady").build();
@@ -122,7 +122,7 @@ class CompaniesServiceImplTest {
         //When
         when(companiesRepo.findById(companyId)).thenReturn(Optional.empty());
         // Execute
-        CompanyNonFoundException exception = assertThrows(CompanyNonFoundException.class,
+        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
                 () -> companiesService.getCompany(companyId));
 
         // Then
@@ -132,15 +132,15 @@ class CompaniesServiceImplTest {
     @Test
     void addUserToCompany() {
         UUID companyId = UUID.randomUUID();
-        AddUserDto addUserDto = AddUserDto.builder().build();
+        AddEmployeeDto addEmployeeDto = AddEmployeeDto.builder().build();
         CompanyEntity companyEntity = new CompanyEntity();
         when(companiesRepo.findById(companyId)).thenReturn(Optional.of(companyEntity));
-        when(usersMapper.toEntity(addUserDto)).thenReturn(new UserEntity());
+        when(employeesMapper.toEntity(addEmployeeDto)).thenReturn(new EmployeeEntity());
 
-        companiesService.addUserToCompany(companyId, addUserDto);
+        companiesService.addEmployeeToCompany(companyId, addEmployeeDto);
 
         verify(companiesRepo, times(1)).findById(companyId);
-        verify(usersRepo, times(1)).save(ArgumentMatchers.any(UserEntity.class));
+        verify(employeesRepo, times(1)).save(ArgumentMatchers.any(EmployeeEntity.class));
     }
 
     @Test
@@ -148,14 +148,14 @@ class CompaniesServiceImplTest {
         UUID companyId = UUID.randomUUID();
         CompanyEntity companyEntity = new CompanyEntity();
         when(companiesRepo.findById(companyId)).thenReturn(Optional.of(companyEntity));
-        when(usersRepo.findByCompany(ArgumentMatchers.any(CompanyEntity.class))).thenReturn(List.of(UserEntity.builder().id(UUID.randomUUID()).build()));
-        when(usersMapper.toDto(ArgumentMatchers.any(UserEntity.class))).thenReturn(DisplayUserDto.builder().build());
+        when(employeesRepo.findByCompany(ArgumentMatchers.any(CompanyEntity.class))).thenReturn(List.of(EmployeeEntity.builder().id(UUID.randomUUID()).build()));
+        when(employeesMapper.toDto(ArgumentMatchers.any(EmployeeEntity.class))).thenReturn(DisplayEmployeeDto.builder().build());
 
-        List<DisplayUserDto> result = companiesService.getCompanyUsers(companyId);
+        List<DisplayEmployeeDto> result = companiesService.getCompanyEmplyees(companyId);
 
         verify(companiesRepo, times(1)).findById(companyId);
-        verify(usersRepo, times(1)).findByCompany(ArgumentMatchers.any(CompanyEntity.class));
-        verify(usersMapper, times(1)).toDto(ArgumentMatchers.any(UserEntity.class));
+        verify(employeesRepo, times(1)).findByCompany(ArgumentMatchers.any(CompanyEntity.class));
+        verify(employeesMapper, times(1)).toDto(ArgumentMatchers.any(EmployeeEntity.class));
 
         assertNotNull(result);
         assertFalse(result.isEmpty());
@@ -164,13 +164,13 @@ class CompaniesServiceImplTest {
     @Test
     void getCompanyUser() {
         UUID userId = UUID.randomUUID();
-        when(usersRepo.findById(userId)).thenReturn(Optional.of(new UserEntity()));
-        when(usersMapper.toDto(ArgumentMatchers.any(UserEntity.class))).thenReturn(DisplayUserDto.builder().id(userId).build());
+        when(employeesRepo.findById(userId)).thenReturn(Optional.of(new EmployeeEntity()));
+        when(employeesMapper.toDto(ArgumentMatchers.any(EmployeeEntity.class))).thenReturn(DisplayEmployeeDto.builder().id(userId).build());
 
-        DisplayUserDto result = companiesService.getCompanyUser(UUID.randomUUID(), userId);
+        DisplayEmployeeDto result = companiesService.getCompanyEmployee(UUID.randomUUID(), userId);
 
-        verify(usersRepo, times(1)).findById(userId);
-        verify(usersMapper, times(1)).toDto(ArgumentMatchers.any(UserEntity.class));
+        verify(employeesRepo, times(1)).findById(userId);
+        verify(employeesMapper, times(1)).toDto(ArgumentMatchers.any(EmployeeEntity.class));
 
         assertNotNull(result);
     }
@@ -181,17 +181,17 @@ class CompaniesServiceImplTest {
         UUID userId = UUID.randomUUID();
         DepositBalanceDto depositBalanceDto = DepositBalanceDto.builder().depositDate(LocalDate.now()).balance(50.0).enumDepositType(EnumDepositType.GIFTS).build();
         CompanyEntity companyEntity = CompanyEntity.builder().id(companyId).balance(500.0).build();
-        UserEntity userEntity = new UserEntity();
+        EmployeeEntity employeeEntity = new EmployeeEntity();
 
         when(companiesRepo.findById(companyId)).thenReturn(Optional.of(companyEntity));
-        when(usersRepo.findByIdAndCompany(userId, companyEntity)).thenReturn(Optional.of(userEntity));
-        when(usersRepo.save(ArgumentMatchers.any(UserEntity.class))).thenReturn(new UserEntity());
+        when(employeesRepo.findByIdAndCompany(userId, companyEntity)).thenReturn(Optional.of(employeeEntity));
+        when(employeesRepo.save(ArgumentMatchers.any(EmployeeEntity.class))).thenReturn(new EmployeeEntity());
 
-        companiesService.depositBalanceToUser(companyId, userId, depositBalanceDto);
+        companiesService.depositBalanceToEmployee(companyId, userId, depositBalanceDto);
 
         verify(companiesRepo, times(1)).findById(companyId);
-        verify(usersRepo, times(1)).findByIdAndCompany(userId, companyEntity);
-        verify(usersRepo, times(1)).save(ArgumentMatchers.any(UserEntity.class));
+        verify(employeesRepo, times(1)).findByIdAndCompany(userId, companyEntity);
+        verify(employeesRepo, times(1)).save(ArgumentMatchers.any(EmployeeEntity.class));
     }
 
     @Test
@@ -204,13 +204,13 @@ class CompaniesServiceImplTest {
         UUID userId = UUID.randomUUID();
         DepositBalanceDto depositBalanceDto = DepositBalanceDto.builder().depositDate(LocalDate.now()).balance(50.0).enumDepositType(EnumDepositType.GIFTS).build();
         CompanyEntity companyEntity = CompanyEntity.builder().id(companyId).balance(5.0).build();
-        UserEntity userEntity = new UserEntity();
+        EmployeeEntity employeeEntity = new EmployeeEntity();
         //When
         when(companiesRepo.findById(companyId)).thenReturn(Optional.of(companyEntity));
-        when(usersRepo.findByIdAndCompany(userId, companyEntity)).thenReturn(Optional.of(userEntity));
+        when(employeesRepo.findByIdAndCompany(userId, companyEntity)).thenReturn(Optional.of(employeeEntity));
         // Execute
         NotEnoughBalanceException exception = assertThrows(NotEnoughBalanceException.class,
-                () -> companiesService.depositBalanceToUser(companyId, userId, depositBalanceDto));
+                () -> companiesService.depositBalanceToEmployee(companyId, userId, depositBalanceDto));
 
         // Then
         assertEquals(expectedErrorMessage, exception.getMessage());
@@ -221,22 +221,22 @@ class CompaniesServiceImplTest {
         UUID companyId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
         CompanyEntity companyEntity = new CompanyEntity();
-        UserEntity userEntity = new UserEntity();
+        EmployeeEntity employeeEntity = new EmployeeEntity();
         DepositEntity depositEntity = new DepositEntity();
         depositEntity.setBalance(50.0);
         depositEntity.setDepositType(EnumDepositType.GIFTS.name());
         depositEntity.setDepositDate(LocalDate.now().minusDays(100));
 
-        userEntity.addDeposit(depositEntity);
+        employeeEntity.addDeposit(depositEntity);
         companyEntity.setBalance(100.0);
 
         when(companiesRepo.findById(companyId)).thenReturn(Optional.of(companyEntity));
-        when(usersRepo.findByIdAndCompany(userId, companyEntity)).thenReturn(Optional.of(userEntity));
+        when(employeesRepo.findByIdAndCompany(userId, companyEntity)).thenReturn(Optional.of(employeeEntity));
 
-        GetBalanceDto result = companiesService.getUserBalance(companyId, userId);
+        GetBalanceDto result = companiesService.getEmployeeBalance(companyId, userId);
 
         verify(companiesRepo, times(1)).findById(companyId);
-        verify(usersRepo, times(1)).findByIdAndCompany(userId, companyEntity);
+        verify(employeesRepo, times(1)).findByIdAndCompany(userId, companyEntity);
 
         assertNotNull(result);
         assertEquals(50.0, result.balance());

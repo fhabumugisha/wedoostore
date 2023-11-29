@@ -6,11 +6,11 @@ import com.wedogift.backend.entities.CompanyEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(uses = {UsersMapper.class})
+@Mapper(uses = {EmployeesMapper.class})
 public interface CompaniesMapper {
 
     DisplayCompanyDto toDto(CompanyEntity companyEntity);
 
-    @Mapping(target = "users", ignore = true)
+    @Mapping(target = "employees", ignore = true)
     CompanyEntity toEntity(AddCompanyDto addCompanyDto);
 }

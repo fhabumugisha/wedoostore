@@ -16,8 +16,8 @@ import java.util.ArrayList;
 @Slf4j
 @RestControllerAdvice()
 public class GlobalExeptionHandler {
-    @ExceptionHandler({CompanyNonFoundException.class, UserNotFoundException.class})
-    public ResponseEntity<ErrorDto> handleFunctionalMessageException(CompanyNonFoundException ex) {
+    @ExceptionHandler({ResourceNotFoundException.class})
+    public ResponseEntity<ErrorDto> handleFunctionalMessageException(ResourceNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorDto.builder().message(ex.getMessage()).status(HttpStatus.NOT_FOUND.value()).build());
     }
 

@@ -4,5 +4,5 @@ import jakarta.validation.constraints.NotEmpty;
 import lombok.Builder;
 
 @Builder
-public record AddUserDto(@NotEmpty String name) {
+public record AddEmployeeDto(@NotEmpty String name) {
 }
