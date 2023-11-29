@@ -18,40 +18,41 @@ import java.util.ArrayList;
 public class GlobalExeptionHandler {
     @ExceptionHandler({CompanyNonFoundException.class, UserNotFoundException.class})
     public ResponseEntity<ErrorDto> handleFunctionalMessageException(CompanyNonFoundException ex) {
-        return  ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorDto.builder().message(ex.getMessage()).status(HttpStatus.NOT_FOUND.value()).build() );
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ErrorDto.builder().message(ex.getMessage()).status(HttpStatus.NOT_FOUND.value()).build());
     }
-    @ExceptionHandler({NotEnoughBalanceException.class})
+
+    @ExceptionHandler({NotEnoughBalanceException.class, DuplicateResourceException.class})
     public ResponseEntity<ErrorDto> handleFunctionalMessageException(NotEnoughBalanceException ex) {
-        return  ResponseEntity.badRequest().body(ErrorDto.builder().message(ex.getMessage()).status(HttpStatus.BAD_REQUEST.value()).build() );
+        return ResponseEntity.badRequest().body(ErrorDto.builder().message(ex.getMessage()).status(HttpStatus.BAD_REQUEST.value()).build());
     }
 
 
     // Default handler
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorDto> handleException(Exception ex) {
-        return  ResponseEntity.internalServerError().body(ErrorDto.builder().message(ex.getMessage()).status(HttpStatus.INTERNAL_SERVER_ERROR.value()).build() );
+        return ResponseEntity.internalServerError().body(ErrorDto.builder().message(ex.getMessage()).status(HttpStatus.INTERNAL_SERVER_ERROR.value()).build());
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
-   public ResponseEntity<ValidationErrorResponse> onConstraintValidationException(
+    public ResponseEntity<ValidationErrorResponse> onConstraintValidationException(
             ConstraintViolationException e) {
         ValidationErrorResponse error = ValidationErrorResponse.builder().violations(new ArrayList<>()).build();
         for (ConstraintViolation violation : e.getConstraintViolations()) {
             error.violations().add(
                     Violation.builder()
                             .fieldName(violation.getPropertyPath().toString()).
-                            message( violation.getMessage()).build( ));
+                            message(violation.getMessage()).build());
         }
         return ResponseEntity.badRequest().body(error);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ValidationErrorResponse>  onMethodArgumentNotValidException(
+    public ResponseEntity<ValidationErrorResponse> onMethodArgumentNotValidException(
             MethodArgumentNotValidException e) {
-        ValidationErrorResponse error =  ValidationErrorResponse.builder().violations(new ArrayList<>()).build();
+        ValidationErrorResponse error = ValidationErrorResponse.builder().violations(new ArrayList<>()).build();
         for (FieldError fieldError : e.getBindingResult().getFieldErrors()) {
             error.violations().add(
-                    Violation.builder().fieldName(fieldError.getField()).message(fieldError.getDefaultMessage()).build( ));
+                    Violation.builder().fieldName(fieldError.getField()).message(fieldError.getDefaultMessage()).build());
         }
         return ResponseEntity.badRequest().body(error);
     }

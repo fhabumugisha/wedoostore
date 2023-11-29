@@ -5,6 +5,7 @@ import com.wedogift.backend.entities.CompanyEntity;
 import com.wedogift.backend.entities.DepositEntity;
 import com.wedogift.backend.entities.UserEntity;
 import com.wedogift.backend.exceptions.CompanyNonFoundException;
+import com.wedogift.backend.exceptions.DuplicateResourceException;
 import com.wedogift.backend.exceptions.NotEnoughBalanceException;
 import com.wedogift.backend.mappers.CompaniesMapper;
 import com.wedogift.backend.mappers.UsersMapper;
@@ -16,6 +17,7 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -29,13 +31,19 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class CompaniesServiceImplTest {
 
-    @Mock private CompaniesMapper companiesMapper;
-    @Mock private UsersMapper usersMapper;
-    @Mock private UsersRepo usersRepo;
+    @Mock
+    private CompaniesMapper companiesMapper;
+    @Mock
+    private UsersMapper usersMapper;
+    @Mock
+    private UsersRepo usersRepo;
 
-    @Mock private CompaniesRepo companiesRepo;
-
-    @InjectMocks   private CompaniesServiceImpl companiesService;
+    @Mock
+    private CompaniesRepo companiesRepo;
+    @Mock
+    private PasswordEncoder passwordEncoder;
+    @InjectMocks
+    private CompaniesServiceImpl companiesService;
 
 
     @Test
@@ -56,6 +64,24 @@ class CompaniesServiceImplTest {
         verify(companiesRepo, times(1)).save(ArgumentMatchers.any(CompanyEntity.class));
 
         assertNotNull(companyId);
+    }
+
+    @Test
+    void addCompany_WithExistingEmail_ShouldThrowException() {
+        //Given
+        
+        String expectedErrorMessage = "Email already taken";
+        String email = "company@wedoostore.com";
+        AddCompanyDto addCompanyDto = AddCompanyDto.builder().email(email).name("Glady").build();
+
+        //When
+        when(companiesRepo.findByEmail(email)).thenReturn(Optional.of(CompanyEntity.builder().build()));
+        // Execute
+        DuplicateResourceException exception = assertThrows(DuplicateResourceException.class,
+                () -> companiesService.addCompany(addCompanyDto));
+
+        // Then
+        assertEquals(expectedErrorMessage, exception.getMessage());
     }
 
     @Test
@@ -104,7 +130,7 @@ class CompaniesServiceImplTest {
     }
 
     @Test
-    void testAddUserToCompany() {
+    void addUserToCompany() {
         UUID companyId = UUID.randomUUID();
         AddUserDto addUserDto = AddUserDto.builder().build();
         CompanyEntity companyEntity = new CompanyEntity();
@@ -118,7 +144,7 @@ class CompaniesServiceImplTest {
     }
 
     @Test
-    void testGetCompanyUsers() {
+    void getCompanyUsers() {
         UUID companyId = UUID.randomUUID();
         CompanyEntity companyEntity = new CompanyEntity();
         when(companiesRepo.findById(companyId)).thenReturn(Optional.of(companyEntity));
@@ -136,7 +162,7 @@ class CompaniesServiceImplTest {
     }
 
     @Test
-    void testGetCompanyUser() {
+    void getCompanyUser() {
         UUID userId = UUID.randomUUID();
         when(usersRepo.findById(userId)).thenReturn(Optional.of(new UserEntity()));
         when(usersMapper.toDto(ArgumentMatchers.any(UserEntity.class))).thenReturn(DisplayUserDto.builder().id(userId).build());
@@ -150,7 +176,7 @@ class CompaniesServiceImplTest {
     }
 
     @Test
-    void testDepositBalanceToUser() {
+    void depositBalanceToUser() {
         UUID companyId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
         DepositBalanceDto depositBalanceDto = DepositBalanceDto.builder().depositDate(LocalDate.now()).balance(50.0).enumDepositType(EnumDepositType.GIFTS).build();
@@ -169,7 +195,7 @@ class CompaniesServiceImplTest {
     }
 
     @Test
-    void depositWIthNotEnoughtBalance_ShouldThrow_Exception(){
+    void depositWIthNotEnoughtBalance_ShouldThrow_Exception() {
 
         //Given
 
@@ -179,7 +205,7 @@ class CompaniesServiceImplTest {
         DepositBalanceDto depositBalanceDto = DepositBalanceDto.builder().depositDate(LocalDate.now()).balance(50.0).enumDepositType(EnumDepositType.GIFTS).build();
         CompanyEntity companyEntity = CompanyEntity.builder().id(companyId).balance(5.0).build();
         UserEntity userEntity = new UserEntity();
-       //When
+        //When
         when(companiesRepo.findById(companyId)).thenReturn(Optional.of(companyEntity));
         when(usersRepo.findByIdAndCompany(userId, companyEntity)).thenReturn(Optional.of(userEntity));
         // Execute
@@ -191,7 +217,7 @@ class CompaniesServiceImplTest {
     }
 
     @Test
-    void testGetUserBalance() {
+    void getUserBalance() {
         UUID companyId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
         CompanyEntity companyEntity = new CompanyEntity();
@@ -215,4 +241,4 @@ class CompaniesServiceImplTest {
         assertNotNull(result);
         assertEquals(50.0, result.balance());
     }
-    }
+}
