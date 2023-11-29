@@ -19,19 +19,18 @@ public class DbInitializer implements CommandLineRunner {
 
 
     @Override
-    public void run(String... args)  {
-		this.companiesRepo.deleteAll();
-        saveCompanyWithUser("Tesla", 100.0, "John");
-        saveCompanyWithUser("Addidas", 150.0, "James");
-        saveCompanyWithUser("Nike", 10.0, "Peter");
-        companiesRepo.findAll().forEach(t -> {
-            log.info("{} Company : {} ", "[APILOG]", t.getName());
-        });
+    public void run(String... args) {
+        this.companiesRepo.deleteAll();
+        saveCompanyWithUser("Tesla", "tesla@wedoostore.com", 100.0, "John");
+        saveCompanyWithUser("Addidas", "addidas@wedoostore.com", 150.0, "James");
+        saveCompanyWithUser("Nike", "nike@wedoostore.com", 10.0, "Peter");
+        companiesRepo.findAll().forEach(t -> log.info("{} Company : {} ", "[APILOG]", t.getName()));
     }
 
-    private void saveCompanyWithUser(String companyName, Double balance, String userName) {
+    private void saveCompanyWithUser(String companyName, String email, Double balance, String userName) {
         CompanyEntity company = CompanyEntity.builder()
                 .name(companyName)
+                .email(email)
                 .balance(balance)
                 .build();
 

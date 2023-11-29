@@ -5,6 +5,7 @@ import com.wedogift.backend.entities.CompanyEntity;
 import com.wedogift.backend.entities.DepositEntity;
 import com.wedogift.backend.entities.UserEntity;
 import com.wedogift.backend.exceptions.CompanyNonFoundException;
+import com.wedogift.backend.exceptions.DuplicateResourceException;
 import com.wedogift.backend.exceptions.NotEnoughBalanceException;
 import com.wedogift.backend.exceptions.UserNotFoundException;
 import com.wedogift.backend.mappers.CompaniesMapper;
@@ -18,17 +19,18 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
-public class CompaniesServiceImpl implements  CompaniesService{
+public class CompaniesServiceImpl implements CompaniesService {
 
     private final CompaniesRepo companiesRepo;
     private final UsersRepo usersRepo;
 
-    private final CompaniesMapper  companiesMapper;
+    private final CompaniesMapper companiesMapper;
 
     private final UsersMapper usersMapper;
 
     public static final String NO_COMPANY_WITH_THE_GIVEN_ID_FOUND = "No company with the given id found";
     public static final String NO_USER_WITH_THE_GIVEN_ID_FOUND = "No user with the given id found in the company";
+
     public CompaniesServiceImpl(CompaniesRepo companiesRepo, UsersRepo usersRepo, CompaniesMapper companiesMapper, UsersMapper usersMapper) {
         this.companiesRepo = companiesRepo;
         this.usersRepo = usersRepo;
@@ -38,11 +40,15 @@ public class CompaniesServiceImpl implements  CompaniesService{
 
     @Override
     public UUID addCompany(AddCompanyDto addCompanyDto) {
-        //Todo validate user input
-        CompanyEntity company =  companiesMapper.toEntity(addCompanyDto);
-       if(company.getUsers() != null){
-           company.getUsers().forEach(userEntity -> userEntity.setCompany(company));
-       }
+        //validate user input
+        companiesRepo.findByEmail(addCompanyDto.email())
+                .ifPresent(c -> {
+                    throw new DuplicateResourceException("Email already taken");
+                });
+        CompanyEntity company = companiesMapper.toEntity(addCompanyDto);
+        if (company.getUsers() != null) {
+            company.getUsers().forEach(userEntity -> userEntity.setCompany(company));
+        }
         return companiesRepo.save(company).getId();
     }
 
@@ -78,14 +84,13 @@ public class CompaniesServiceImpl implements  CompaniesService{
     }
 
 
-
     @Override
     public void depositBalanceToUser(UUID companyId, UUID userId, DepositBalanceDto depositBalanceDto) {
         CompanyEntity company = this.companiesRepo.findById(companyId).orElseThrow(() -> new CompanyNonFoundException(NO_COMPANY_WITH_THE_GIVEN_ID_FOUND));
 
         UserEntity user = this.usersRepo.findByIdAndCompany(userId, company).orElseThrow(() -> new UserNotFoundException(NO_USER_WITH_THE_GIVEN_ID_FOUND));
 
-        if(company.getBalance() < depositBalanceDto.balance()){
+        if (company.getBalance() < depositBalanceDto.balance()) {
             throw new NotEnoughBalanceException("Not enough balance for company with ID: " + companyId);
         }
         //Add deposit to user's deposits
@@ -98,7 +103,7 @@ public class CompaniesServiceImpl implements  CompaniesService{
         usersRepo.save(user);
 
         //Update company
-        company.setBalance(company.getBalance()- depositBalanceDto.balance());
+        company.setBalance(company.getBalance() - depositBalanceDto.balance());
         companiesRepo.save(company);
     }
 

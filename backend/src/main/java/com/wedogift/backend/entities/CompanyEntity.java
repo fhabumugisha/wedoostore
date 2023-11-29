@@ -20,6 +20,8 @@ public class CompanyEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "ID", nullable = false, insertable = false, updatable = false)
     protected UUID id;
+    @Column(unique = true)
+    private String email;
     private String name;
     private Double balance;
     @OneToMany( fetch = FetchType.EAGER, mappedBy = "company", cascade = CascadeType.ALL)
