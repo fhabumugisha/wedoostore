@@ -3,7 +3,6 @@ package com.wedogift.backend.entities;
 import jakarta.persistence.*;
 import lombok.*;
 
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -14,8 +13,8 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "users")
-public class UserEntity {
+@Table(name = "employees")
+public class EmployeeEntity {
 
 
     @Id
@@ -24,24 +23,24 @@ public class UserEntity {
     protected UUID id;
     private String name;
     @ManyToOne
-    @JoinColumn(name="company_id")
+    @JoinColumn(name = "company_id")
     private CompanyEntity company;
-    // List of deposits made by the user
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    // List of deposits made by the employee
+    @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL)
     private List<DepositEntity> deposits = new ArrayList<>();
 
     public void addDeposit(DepositEntity depositEntity) {
-        if(null == deposits){
-            deposits =  new ArrayList<>();
+        if (null == deposits) {
+            deposits = new ArrayList<>();
         }
         deposits.add(depositEntity);
-        depositEntity.setUser(this);
+        depositEntity.setEmployee(this);
     }
 
     public void removeDeposit(DepositEntity depositEntity) {
-        if(null != deposits){
+        if (null != deposits) {
             deposits.remove(depositEntity);
         }
-        depositEntity.setUser(null);
+        depositEntity.setEmployee(null);
     }
 }

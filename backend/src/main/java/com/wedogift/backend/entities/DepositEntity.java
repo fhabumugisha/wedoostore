@@ -14,7 +14,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name="deposits")
+@Table(name = "deposits")
 public class DepositEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -24,6 +24,6 @@ public class DepositEntity {
     private LocalDate depositDate;
     private String depositType;
     @ManyToOne
-    @JoinColumn(name="user_id")
-    private UserEntity user;
+    @JoinColumn(name = "employee_id")
+    private EmployeeEntity employee;
 }

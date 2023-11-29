@@ -30,21 +30,21 @@ public class CompanyEntity implements UserDetails {
     private String name;
     private Double balance;
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "company", cascade = CascadeType.ALL)
-    private List<UserEntity> users = new ArrayList<>();
+    private List<EmployeeEntity> employees = new ArrayList<>();
 
-    public void addUser(UserEntity userEntity) {
-        if (null == users) {
-            users = new ArrayList<>();
+    public void addEmployee(EmployeeEntity employeeEntity) {
+        if (null == employees) {
+            employees = new ArrayList<>();
         }
-        users.add(userEntity);
-        userEntity.setCompany(this);
+        employees.add(employeeEntity);
+        employeeEntity.setCompany(this);
     }
 
-    public void removeUser(UserEntity userEntity) {
-        if (null != users) {
-            users.remove(userEntity);
+    public void removeEmployee(EmployeeEntity employeeEntity) {
+        if (null != employees) {
+            employees.remove(employeeEntity);
         }
-        userEntity.setCompany(null);
+        employeeEntity.setCompany(null);
     }
 
     @Override

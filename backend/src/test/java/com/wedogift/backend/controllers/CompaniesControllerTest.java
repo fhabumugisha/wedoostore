@@ -44,16 +44,15 @@ class CompaniesControllerTest {
 
 
     @Test
-        // @WithJwt
     void depositUserBalance() throws Exception {
         UUID companyId = UUID.randomUUID();
-        UUID userId = UUID.randomUUID();
+        UUID employeeId = UUID.randomUUID();
         DepositBalanceDto depositBalanceDto = DepositBalanceDto.builder().depositDate(LocalDate.now()).balance(50.0).enumDepositType(EnumDepositType.GIFTS).build();
 
         String jwtToken = "fake";
 
         RequestBuilder requestBuilder = MockMvcRequestBuilders
-                .post("/api/v1/companies/{companyId}/users/{userId}/deposit", companyId, userId)
+                .post("/api/v1/companies/{companyId}/employees/{employeeId}/deposit", companyId, employeeId)
                 .with(jwt().authorities(List.of(new SimpleGrantedAuthority("ROLE_USER"))).jwt(builder -> builder.tokenValue("test").header("Authorization Bearer ", "test")))
                 .content(objectMapper.writeValueAsString(depositBalanceDto))
                 .contentType(MediaType.APPLICATION_JSON)
@@ -68,11 +67,11 @@ class CompaniesControllerTest {
     void depositUserBalance_WithInvalidInput_SHouldReturn400() throws Exception {
         //Given
         UUID companyId = UUID.randomUUID();
-        UUID userId = UUID.randomUUID();
+        UUID employeeId = UUID.randomUUID();
         DepositBalanceDto depositBalanceDto = DepositBalanceDto.builder().balance(50.0).enumDepositType(EnumDepositType.GIFTS).build();
         String jwtToken = "FAKE";
         RequestBuilder requestBuilder = MockMvcRequestBuilders
-                .post("/api/v1/companies/{companyId}/users/{userId}/deposit", companyId, userId)
+                .post("/api/v1/companies/{companyId}/employees/{employeeId}/deposit", companyId, employeeId)
                 .with(jwt().authorities(List.of(new SimpleGrantedAuthority("ROLE_USER"))).jwt(builder -> builder.tokenValue("test").header("Authorization Bearer ", "test")))
 
                 .content(objectMapper.writeValueAsString(depositBalanceDto))
@@ -88,14 +87,14 @@ class CompaniesControllerTest {
     @Test
     void getUserBalance() throws Exception {
         UUID companyId = UUID.randomUUID();
-        UUID userId = UUID.randomUUID();
+        UUID employeeId = UUID.randomUUID();
         GetBalanceDto getBalanceDto = GetBalanceDto.builder().balance(50.0).build();
 
-        when(companiesService.getUserBalance(companyId, userId)).thenReturn(getBalanceDto);
+        when(companiesService.getEmployeeBalance(companyId, employeeId)).thenReturn(getBalanceDto);
 
         Object jwtToken = "FAKE";
         RequestBuilder requestBuilder = MockMvcRequestBuilders
-                .get("/api/v1/companies/{companyId}/users/{userId}/balance", companyId, userId)
+                .get("/api/v1/companies/{companyId}/employees/{employeeId}/balance", companyId, employeeId)
                 .accept(MediaType.APPLICATION_JSON)
                 .with(jwt().authorities(List.of(new SimpleGrantedAuthority("ROLE_USER"))).jwt(builder -> builder.tokenValue("test").header("Authorization Bearer ", "test")));
 
