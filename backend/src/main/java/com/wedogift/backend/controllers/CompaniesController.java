@@ -43,7 +43,8 @@ public class CompaniesController {
                     content = @Content),
     })
     @PostMapping
-    public ResponseEntity<String> addCompany(@Valid @Parameter(name = "companyDto") @RequestBody AddCompanyDto companyDto) {
+    public ResponseEntity<String> addCompany(@Valid @Parameter(name = "companyDto")
+                                             @RequestBody AddCompanyDto companyDto) {
         UUID id = companiesService.addCompany(companyDto);
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()

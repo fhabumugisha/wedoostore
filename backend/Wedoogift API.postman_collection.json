@@ -7,8 +7,113 @@
 	},
 	"item": [
 		{
-			"name": "Get all companies",
+			"name": "Add company",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Extract Authorization Token\", function () {\r",
+							"    var authToken = pm.response.headers.get(\"Authorization\");\r",
+							"    pm.collectionVariables.set(\"authToken\", authToken);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"\r",
+							"// Generate a random email with a fixed 6-character prefix and suffix\r",
+							"function generateRandomEmail() {\r",
+							"    const randomSuffix = '@wedoostore.com';\r",
+							"\r",
+							"    // Generate a random 6-character prefix\r",
+							"    const randomPrefix = generateRandomString(6);\r",
+							"\r",
+							"    // Concatenate the random prefix, suffix, and prefix to create the email\r",
+							"    let randomEmail = `${randomPrefix}${randomSuffix}`;\r",
+							"\r",
+							"    return randomEmail;\r",
+							"}\r",
+							"\r",
+							"// Function to generate a random string of a given length\r",
+							"function generateRandomString(length) {\r",
+							"    const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';\r",
+							"    let randomString = '';\r",
+							"    for (let i = 0; i < length; i++) {\r",
+							"        const randomIndex = Math.floor(Math.random() * chars.length);\r",
+							"        randomString += chars.charAt(randomIndex);\r",
+							"    }\r",
+							"    return randomString;\r",
+							"}\r",
+							"\r",
+							"// Set the random email to the companyEmail variable\r",
+							"pm.collectionVariables.set('companyEmail', generateRandomEmail());\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
 			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"name\": \"Glady2\",\n  \"email\": \"{{companyEmail}}\",\n  \"password\":\"mySuperPassword123*\",\n  \"balance\": 150.0,\n\n  \"users\": [\n    {\n      \"name\": \"Emma\"\n    }\n  ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/v1/companies",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"v1",
+						"companies"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get all companies",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Extract companyId\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.collectionVariables.set(\"companyId\", jsonData[0].id);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{authToken}}",
+							"type": "string"
+						}
+					]
+				},
 				"method": "GET",
 				"header": [],
 				"url": {
@@ -28,77 +133,18 @@
 			"response": []
 		},
 		{
-			"name": "Get company users",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "http://localhost:8080/api/v1/companies/3b48432b-bbb3-42bc-a1f4-3f6a1ee945ca/users",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "8080",
-					"path": [
-						"api",
-						"v1",
-						"companies",
-						"3b48432b-bbb3-42bc-a1f4-3f6a1ee945ca",
-						"users"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Get company user",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "http://localhost:8080/api/v1/companies/3b48432b-bbb3-42bc-a1f4-3f6a1ee945ca/users/9cf0e7ac-17f4-4566-81db-680fc6a117c5",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "8080",
-					"path": [
-						"api",
-						"v1",
-						"companies",
-						"3b48432b-bbb3-42bc-a1f4-3f6a1ee945ca",
-						"users",
-						"9cf0e7ac-17f4-4566-81db-680fc6a117c5"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Get company",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "http://localhost:8080/api/v1/companies/3b48432b-bbb3-42bc-a1f4-3f6a1ee945ca",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "8080",
-					"path": [
-						"api",
-						"v1",
-						"companies",
-						"3b48432b-bbb3-42bc-a1f4-3f6a1ee945ca"
-					]
-				}
-			},
-			"response": []
-		},
-		{
 			"name": "Add user to  company",
 			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{authToken}}",
+							"type": "string"
+						}
+					]
+				},
 				"method": "POST",
 				"header": [],
 				"body": {
@@ -111,7 +157,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8080/api/v1/companies/3b48432b-bbb3-42bc-a1f4-3f6a1ee945ca/users",
+					"raw": "http://localhost:8080/api/v1/companies/{{companyId}}/users",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -121,7 +167,7 @@
 						"api",
 						"v1",
 						"companies",
-						"3b48432b-bbb3-42bc-a1f4-3f6a1ee945ca",
+						"{{companyId}}",
 						"users"
 					]
 				}
@@ -129,21 +175,22 @@
 			"response": []
 		},
 		{
-			"name": "Add companies",
+			"name": "Get company",
 			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n  \"name\": \"Glady\",\n  \"balance\": 1000,\n  \"users\": [\n    {\n      \"name\": \"Emma\"\n    }\n  ]\n}",
-					"options": {
-						"raw": {
-							"language": "json"
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{authToken}}",
+							"type": "string"
 						}
-					}
+					]
 				},
+				"method": "GET",
+				"header": [],
 				"url": {
-					"raw": "http://localhost:8080/api/v1/companies",
+					"raw": "http://localhost:8080/api/v1/companies/{{companyId}}",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -152,7 +199,89 @@
 					"path": [
 						"api",
 						"v1",
-						"companies"
+						"companies",
+						"{{companyId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get company users",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Extract userId\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.collectionVariables.set(\"userId\", jsonData[0].id);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{authToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/v1/companies/{{companyId}}/users",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"v1",
+						"companies",
+						"{{companyId}}",
+						"users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get company user",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{authToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/v1/companies/{{companyId}}/users/{{userId}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"v1",
+						"companies",
+						"{{companyId}}",
+						"users",
+						"{{userId}}"
 					]
 				}
 			},
@@ -161,6 +290,16 @@
 		{
 			"name": "Deposit Not enough balance",
 			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{authToken}}",
+							"type": "string"
+						}
+					]
+				},
 				"method": "POST",
 				"header": [],
 				"body": {
@@ -173,7 +312,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8080/api/v1/companies/3b48432b-bbb3-42bc-a1f4-3f6a1ee945ca/users/9cf0e7ac-17f4-4566-81db-680fc6a117c5/deposit",
+					"raw": "http://localhost:8080/api/v1/companies/{{companyId}}/users/{{userId}}/deposit",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -183,9 +322,9 @@
 						"api",
 						"v1",
 						"companies",
-						"3b48432b-bbb3-42bc-a1f4-3f6a1ee945ca",
+						"{{companyId}}",
 						"users",
-						"9cf0e7ac-17f4-4566-81db-680fc6a117c5",
+						"{{userId}}",
 						"deposit"
 					]
 				}
@@ -195,11 +334,21 @@
 		{
 			"name": "Deposit OK",
 			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{authToken}}",
+							"type": "string"
+						}
+					]
+				},
 				"method": "POST",
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n  \"depositDate\": \"2023-11-24\",\n  \"balance\": 50,\n  \"enumDepositType\": \"GIFTS\"\n}",
+					"raw": "{\n  \"depositDate\": \"2023-11-29\",\n  \"balance\": 20.0,\n  \"enumDepositType\": \"MEALS\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -207,7 +356,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8080/api/v1/companies/3b48432b-bbb3-42bc-a1f4-3f6a1ee945ca/users/9cf0e7ac-17f4-4566-81db-680fc6a117c5/deposit",
+					"raw": "http://localhost:8080/api/v1/companies/{{companyId}}/users/{{userId}}/deposit",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -217,9 +366,9 @@
 						"api",
 						"v1",
 						"companies",
-						"3b48432b-bbb3-42bc-a1f4-3f6a1ee945ca",
+						"{{companyId}}",
 						"users",
-						"9cf0e7ac-17f4-4566-81db-680fc6a117c5",
+						"{{userId}}",
 						"deposit"
 					]
 				}
@@ -229,10 +378,20 @@
 		{
 			"name": "GetUserBalance",
 			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{authToken}}",
+							"type": "string"
+						}
+					]
+				},
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8080/api/v1/companies/3b48432b-bbb3-42bc-a1f4-3f6a1ee945ca/users/9cf0e7ac-17f4-4566-81db-680fc6a117c5/balance",
+					"raw": "http://localhost:8080/api/v1/companies/{{companyId}}/users/{{userId}}/balance",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -242,14 +401,53 @@
 						"api",
 						"v1",
 						"companies",
-						"3b48432b-bbb3-42bc-a1f4-3f6a1ee945ca",
+						"{{companyId}}",
 						"users",
-						"9cf0e7ac-17f4-4566-81db-680fc6a117c5",
+						"{{userId}}",
 						"balance"
 					]
 				}
 			},
 			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "companyId",
+			"value": "3b3b520b-0627-40cf-84a7-8332cfc9a7cb"
+		},
+		{
+			"key": "userId",
+			"value": "9cf0e7ac-17f4-4566-81db-680fc6a117c5"
+		},
+		{
+			"key": "authToken",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "companyEmail",
+			"value": ""
 		}
 	]
 }

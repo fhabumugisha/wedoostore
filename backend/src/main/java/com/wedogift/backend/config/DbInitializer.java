@@ -1,8 +1,7 @@
 package com.wedogift.backend.config;
 
-import com.wedogift.backend.entities.CompanyEntity;
-import com.wedogift.backend.entities.UserEntity;
-import com.wedogift.backend.repos.CompaniesRepo;
+import com.wedogift.backend.dtos.AddCompanyDto;
+import com.wedogift.backend.services.CompaniesService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
@@ -11,36 +10,25 @@ import org.springframework.stereotype.Component;
 @Component
 public class DbInitializer implements CommandLineRunner {
 
-    private final CompaniesRepo companiesRepo;
+    private final CompaniesService companiesService;
 
-    public DbInitializer(CompaniesRepo companiesRepo) {
-        this.companiesRepo = companiesRepo;
+    public DbInitializer(CompaniesService companiesService) {
+        this.companiesService = companiesService;
     }
 
 
     @Override
     public void run(String... args) {
-        this.companiesRepo.deleteAll();
+
         saveCompanyWithUser("Tesla", "tesla@wedoostore.com", 100.0, "John");
         saveCompanyWithUser("Addidas", "addidas@wedoostore.com", 150.0, "James");
         saveCompanyWithUser("Nike", "nike@wedoostore.com", 10.0, "Peter");
-        companiesRepo.findAll().forEach(t -> log.info("{} Company : {} ", "[APILOG]", t.getName()));
+        companiesService.getAllCompanies().forEach(t -> log.info("{} Company : {} ", "[APILOG]", t.name()));
     }
 
-    private void saveCompanyWithUser(String companyName, String email, Double balance, String userName) {
-        CompanyEntity company = CompanyEntity.builder()
-                .name(companyName)
-                .email(email)
-                .balance(balance)
-                .build();
-
-        UserEntity user = UserEntity.builder()
-                .name(userName)
-                .build();
-
-        company.addUser(user);
-
-        companiesRepo.save(company);
+    private void saveCompanyWithUser(String companyName, String email, Double balance, String password) {
+        companiesService.addCompany(AddCompanyDto.builder().name(companyName)
+                .email(email).balance(balance).password(password).build());
     }
 
 }

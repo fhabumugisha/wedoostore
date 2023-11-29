@@ -1,5 +1,6 @@
 package com.wedogift.backend.jwt;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
@@ -46,5 +47,23 @@ public class JwtProvider {
 
     private Key getSigningKey() {
         return Keys.hmacShaKeyFor(secretKey.getBytes());
+    }
+
+
+    public String getSubject(String jwtToken) {
+        return getClaims(jwtToken).getSubject();
+    }
+
+    private Claims getClaims(String jwtToken) {
+        return Jwts.parser().setSigningKey(getSigningKey()).build().parseSignedClaims(jwtToken).getPayload();
+    }
+
+    public boolean isTokenValid(String jwt, String username) {
+        String subject = getSubject(jwt);
+        return subject.equals(username) && !isTokenExpired(jwt);
+    }
+
+    private boolean isTokenExpired(String jwt) {
+        return getClaims(jwt).getExpiration().before(Date.from(Instant.now()));
     }
 }

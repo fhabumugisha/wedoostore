@@ -12,6 +12,9 @@ import com.wedogift.backend.mappers.CompaniesMapper;
 import com.wedogift.backend.mappers.UsersMapper;
 import com.wedogift.backend.repos.CompaniesRepo;
 import com.wedogift.backend.repos.UsersRepo;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -28,14 +31,17 @@ public class CompaniesServiceImpl implements CompaniesService {
 
     private final UsersMapper usersMapper;
 
+    private final PasswordEncoder passwordEncoder;
+
     public static final String NO_COMPANY_WITH_THE_GIVEN_ID_FOUND = "No company with the given id found";
     public static final String NO_USER_WITH_THE_GIVEN_ID_FOUND = "No user with the given id found in the company";
 
-    public CompaniesServiceImpl(CompaniesRepo companiesRepo, UsersRepo usersRepo, CompaniesMapper companiesMapper, UsersMapper usersMapper) {
+    public CompaniesServiceImpl(CompaniesRepo companiesRepo, UsersRepo usersRepo, CompaniesMapper companiesMapper, UsersMapper usersMapper, PasswordEncoder passwordEncoder) {
         this.companiesRepo = companiesRepo;
         this.usersRepo = usersRepo;
         this.companiesMapper = companiesMapper;
         this.usersMapper = usersMapper;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -46,9 +52,7 @@ public class CompaniesServiceImpl implements CompaniesService {
                     throw new DuplicateResourceException("Email already taken");
                 });
         CompanyEntity company = companiesMapper.toEntity(addCompanyDto);
-        if (company.getUsers() != null) {
-            company.getUsers().forEach(userEntity -> userEntity.setCompany(company));
-        }
+        company.setPassword(passwordEncoder.encode(company.getPassword()));
         return companiesRepo.save(company).getId();
     }
 
@@ -137,5 +141,10 @@ public class CompaniesServiceImpl implements CompaniesService {
         return GetBalanceDto.builder().balance(userBalance).build();
 
 
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        return companiesRepo.findByEmail(username).orElseThrow(() -> new UsernameNotFoundException("username " + username + "not found"));
     }
 }
