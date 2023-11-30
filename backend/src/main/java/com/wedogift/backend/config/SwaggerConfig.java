@@ -6,17 +6,14 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 
-
 /**
  * Configuration of swagger
- *
  */
 @Configuration
 
 public class SwaggerConfig {
     /**
      * Config of servers
-     * @return
      */
     @Bean
     public OpenAPI customOpenAPI() {

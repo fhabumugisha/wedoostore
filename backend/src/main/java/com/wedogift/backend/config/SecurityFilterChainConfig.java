@@ -31,6 +31,7 @@ public class SecurityFilterChainConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "/api/v1/companies").permitAll()
+                        .requestMatchers("/swagger-ui/**", "/api-docs.yaml", "/api-docs/**").permitAll()
                         .anyRequest().authenticated()
 
                 ).sessionManagement(sessionManagement -> sessionManagement

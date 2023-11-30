@@ -25,63 +25,65 @@ public interface CompaniesService extends UserDetailsService {
      */
     List<DisplayCompanyDto> getAllCompanies();
 
+    void deleteAllCompanies();
 
     /**
      * Get company the id
      *
-     * @param companyId the id of the company to read
+     * @param companyEmail the email of the company to read
      * @return @{@link DisplayCompanyDto}
      */
-    DisplayCompanyDto getCompany(UUID companyId);
+    DisplayCompanyDto getCompany(String companyEmail);
+
+    /**
+     * Get user details
+     *
+     * @param username the username of logged in user
+     * @return USerDetails
+     */
+    UserDetails loadUserByUsername(String username);
 
     /**
      * Adds a new employee to a company
      *
-     * @param companyId   the id of the company
-     * @param addEmployee the employee to add
+     * @param companyEmail the email of the company
+     * @param employeeDto  the employee to add
      */
-    void addEmployeeToCompany(UUID companyId, AddEmployeeDto addEmployee);
+    void addEmployeeToCompany(String companyEmail, AddEmployeeDto employeeDto);
 
     /**
      * Get all employees of a company
      *
-     * @param companyId the id to the company
+     * @param companyEmail the email to the company
      * @return list of {@link  DisplayEmployeeDto}
      */
-
-    List<DisplayEmployeeDto> getCompanyEmplyees(UUID companyId);
-
+    List<DisplayEmployeeDto> getCompanyEmplyees(String companyEmail);
 
     /**
      * Get an  employee by id
      *
-     * @param companyId  the id to the company
-     * @param employeeId the id of the employee to read
+     * @param companyEmail the email to the company
+     * @param employeeId   the id of the employee to read
      * @return list of {@link  DisplayEmployeeDto}
      */
 
-    DisplayEmployeeDto getCompanyEmployee(UUID companyId, UUID employeeId);
+    DisplayEmployeeDto getCompanyEmployee(String companyEmail, UUID employeeId);
 
     /**
      * Make a deposit
      *
-     * @param companyId         the id to the company  which makes deposit
+     * @param companyEmail      the email to the company  which makes deposit
      * @param employeeId        the id of the employee who receive the deposit
      * @param depositBalanceDto the value of deposit {@link DepositBalanceDto}
      */
-    void depositBalanceToEmployee(UUID companyId, UUID employeeId, DepositBalanceDto depositBalanceDto);
-
+    void depositBalanceToEmployee(String companyEmail, UUID employeeId, DepositBalanceDto depositBalanceDto);
 
     /**
      * Returns the employee balance
      *
-     * @param companyId  the id to the company of the employee
-     * @param employeeId the id of the employee
+     * @param companyEmail the email to the company of the employee
+     * @param employeeId   the id of the employee
      * @return the employee's balance
      */
-    GetBalanceDto getEmployeeBalance(UUID companyId, UUID employeeId);
-
-    UserDetails loadUserByUsername(String employeename);
-
-
+    GetBalanceDto getEmployeeBalance(String companyEmail, UUID employeeId);
 }
