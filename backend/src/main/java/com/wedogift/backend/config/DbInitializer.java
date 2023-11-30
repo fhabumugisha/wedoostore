@@ -19,7 +19,7 @@ public class DbInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-
+        companiesService.deleteAllCompanies();
         saveCompanyWithUser("Tesla", "tesla@wedoostore.com", 100.0, "John");
         saveCompanyWithUser("Addidas", "addidas@wedoostore.com", 150.0, "James");
         saveCompanyWithUser("Nike", "nike@wedoostore.com", 10.0, "Peter");

@@ -101,14 +101,14 @@ class CompaniesServiceImplTest {
 
     @Test
     void getCompany() {
-        UUID companyId = UUID.randomUUID();
+        String companyEmail = "company@wedoostrore.com";
         CompanyEntity companyEntity = new CompanyEntity();
-        when(companiesRepo.findById(companyId)).thenReturn(Optional.of(companyEntity));
-        when(companiesMapper.toDto(ArgumentMatchers.any(CompanyEntity.class))).thenReturn(DisplayCompanyDto.builder().id(companyId).build());
+        when(companiesRepo.findByEmail(companyEmail)).thenReturn(Optional.of(companyEntity));
+        when(companiesMapper.toDto(ArgumentMatchers.any(CompanyEntity.class))).thenReturn(DisplayCompanyDto.builder().email(companyEmail).build());
 
-        DisplayCompanyDto result = companiesService.getCompany(companyId);
+        DisplayCompanyDto result = companiesService.getCompany(companyEmail);
 
-        verify(companiesRepo, times(1)).findById(companyId);
+        verify(companiesRepo, times(1)).findByEmail(companyEmail);
         verify(companiesMapper, times(1)).toDto(ArgumentMatchers.any(CompanyEntity.class));
 
         assertNotNull(result);
@@ -117,13 +117,13 @@ class CompaniesServiceImplTest {
     @Test
     void getCompany_WithNoExistingId_ShouldThrowException() {
         //Given
-        UUID companyId = UUID.randomUUID();
-        String expectedErrorMessage = "No company with the given id found";
+        String companyEmail = "company@wedoostrore.com";
+        String expectedErrorMessage = "No company found with the given id ";
         //When
-        when(companiesRepo.findById(companyId)).thenReturn(Optional.empty());
+        when(companiesRepo.findByEmail(companyEmail)).thenReturn(Optional.empty());
         // Execute
         ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class,
-                () -> companiesService.getCompany(companyId));
+                () -> companiesService.getCompany(companyEmail));
 
         // Then
         assertEquals(expectedErrorMessage, exception.getMessage());
@@ -131,29 +131,29 @@ class CompaniesServiceImplTest {
 
     @Test
     void addUserToCompany() {
-        UUID companyId = UUID.randomUUID();
+        String companyEmail = "company@wedoostrore.com";
         AddEmployeeDto addEmployeeDto = AddEmployeeDto.builder().build();
         CompanyEntity companyEntity = new CompanyEntity();
-        when(companiesRepo.findById(companyId)).thenReturn(Optional.of(companyEntity));
+        when(companiesRepo.findByEmail(companyEmail)).thenReturn(Optional.of(companyEntity));
         when(employeesMapper.toEntity(addEmployeeDto)).thenReturn(new EmployeeEntity());
 
-        companiesService.addEmployeeToCompany(companyId, addEmployeeDto);
+        companiesService.addEmployeeToCompany(companyEmail, addEmployeeDto);
 
-        verify(companiesRepo, times(1)).findById(companyId);
+        verify(companiesRepo, times(1)).findByEmail(companyEmail);
         verify(employeesRepo, times(1)).save(ArgumentMatchers.any(EmployeeEntity.class));
     }
 
     @Test
-    void getCompanyUsers() {
-        UUID companyId = UUID.randomUUID();
+    void getCompanyEmployees() {
+        String companyEmail = "company@wedoostrore.com";
         CompanyEntity companyEntity = new CompanyEntity();
-        when(companiesRepo.findById(companyId)).thenReturn(Optional.of(companyEntity));
+        when(companiesRepo.findByEmail(companyEmail)).thenReturn(Optional.of(companyEntity));
         when(employeesRepo.findByCompany(ArgumentMatchers.any(CompanyEntity.class))).thenReturn(List.of(EmployeeEntity.builder().id(UUID.randomUUID()).build()));
         when(employeesMapper.toDto(ArgumentMatchers.any(EmployeeEntity.class))).thenReturn(DisplayEmployeeDto.builder().build());
 
-        List<DisplayEmployeeDto> result = companiesService.getCompanyEmplyees(companyId);
+        List<DisplayEmployeeDto> result = companiesService.getCompanyEmplyees(companyEmail);
 
-        verify(companiesRepo, times(1)).findById(companyId);
+        verify(companiesRepo, times(1)).findByEmail(companyEmail);
         verify(employeesRepo, times(1)).findByCompany(ArgumentMatchers.any(CompanyEntity.class));
         verify(employeesMapper, times(1)).toDto(ArgumentMatchers.any(EmployeeEntity.class));
 
@@ -163,11 +163,17 @@ class CompaniesServiceImplTest {
 
     @Test
     void getCompanyUser() {
+        String companyEmail = "company@wedoostrore.com";
+        CompanyEntity companyEntity = new CompanyEntity();
+        companyEntity.setId(UUID.randomUUID());
+        when(companiesRepo.findByEmail(companyEmail)).thenReturn(Optional.of(companyEntity));
         UUID userId = UUID.randomUUID();
-        when(employeesRepo.findById(userId)).thenReturn(Optional.of(new EmployeeEntity()));
+        EmployeeEntity employeeEntity = new EmployeeEntity();
+        employeeEntity.setCompany(companyEntity);
+        when(employeesRepo.findById(userId)).thenReturn(Optional.of(employeeEntity));
         when(employeesMapper.toDto(ArgumentMatchers.any(EmployeeEntity.class))).thenReturn(DisplayEmployeeDto.builder().id(userId).build());
 
-        DisplayEmployeeDto result = companiesService.getCompanyEmployee(UUID.randomUUID(), userId);
+        DisplayEmployeeDto result = companiesService.getCompanyEmployee(companyEmail, userId);
 
         verify(employeesRepo, times(1)).findById(userId);
         verify(employeesMapper, times(1)).toDto(ArgumentMatchers.any(EmployeeEntity.class));
@@ -177,40 +183,41 @@ class CompaniesServiceImplTest {
 
     @Test
     void depositBalanceToUser() {
-        UUID companyId = UUID.randomUUID();
+        String companyEmail = "company@wedoostrore.com";
         UUID userId = UUID.randomUUID();
         DepositBalanceDto depositBalanceDto = DepositBalanceDto.builder().depositDate(LocalDate.now()).balance(50.0).enumDepositType(EnumDepositType.GIFTS).build();
-        CompanyEntity companyEntity = CompanyEntity.builder().id(companyId).balance(500.0).build();
+        CompanyEntity companyEntity = CompanyEntity.builder().email(companyEmail).balance(500.0).build();
         EmployeeEntity employeeEntity = new EmployeeEntity();
 
-        when(companiesRepo.findById(companyId)).thenReturn(Optional.of(companyEntity));
+        when(companiesRepo.findByEmail(companyEmail)).thenReturn(Optional.of(companyEntity));
         when(employeesRepo.findByIdAndCompany(userId, companyEntity)).thenReturn(Optional.of(employeeEntity));
         when(employeesRepo.save(ArgumentMatchers.any(EmployeeEntity.class))).thenReturn(new EmployeeEntity());
 
-        companiesService.depositBalanceToEmployee(companyId, userId, depositBalanceDto);
+        companiesService.depositBalanceToEmployee(companyEmail, userId, depositBalanceDto);
 
-        verify(companiesRepo, times(1)).findById(companyId);
+        verify(companiesRepo, times(1)).findByEmail(companyEmail);
         verify(employeesRepo, times(1)).findByIdAndCompany(userId, companyEntity);
         verify(employeesRepo, times(1)).save(ArgumentMatchers.any(EmployeeEntity.class));
     }
 
     @Test
-    void depositWIthNotEnoughtBalance_ShouldThrow_Exception() {
+    void depositWIthNotEnoughBalance_ShouldThrow_Exception() {
 
         //Given
 
         UUID companyId = UUID.randomUUID();
+        String companyEmail = "company@wedoostrore.com";
         String expectedErrorMessage = "Not enough balance for company with ID: " + companyId;
         UUID userId = UUID.randomUUID();
         DepositBalanceDto depositBalanceDto = DepositBalanceDto.builder().depositDate(LocalDate.now()).balance(50.0).enumDepositType(EnumDepositType.GIFTS).build();
         CompanyEntity companyEntity = CompanyEntity.builder().id(companyId).balance(5.0).build();
         EmployeeEntity employeeEntity = new EmployeeEntity();
         //When
-        when(companiesRepo.findById(companyId)).thenReturn(Optional.of(companyEntity));
+        when(companiesRepo.findByEmail(companyEmail)).thenReturn(Optional.of(companyEntity));
         when(employeesRepo.findByIdAndCompany(userId, companyEntity)).thenReturn(Optional.of(employeeEntity));
         // Execute
         NotEnoughBalanceException exception = assertThrows(NotEnoughBalanceException.class,
-                () -> companiesService.depositBalanceToEmployee(companyId, userId, depositBalanceDto));
+                () -> companiesService.depositBalanceToEmployee(companyEmail, userId, depositBalanceDto));
 
         // Then
         assertEquals(expectedErrorMessage, exception.getMessage());
@@ -218,7 +225,7 @@ class CompaniesServiceImplTest {
 
     @Test
     void getUserBalance() {
-        UUID companyId = UUID.randomUUID();
+        String companyEmail = "company@wedoostrore.com";
         UUID userId = UUID.randomUUID();
         CompanyEntity companyEntity = new CompanyEntity();
         EmployeeEntity employeeEntity = new EmployeeEntity();
@@ -230,12 +237,12 @@ class CompaniesServiceImplTest {
         employeeEntity.addDeposit(depositEntity);
         companyEntity.setBalance(100.0);
 
-        when(companiesRepo.findById(companyId)).thenReturn(Optional.of(companyEntity));
+        when(companiesRepo.findByEmail(companyEmail)).thenReturn(Optional.of(companyEntity));
         when(employeesRepo.findByIdAndCompany(userId, companyEntity)).thenReturn(Optional.of(employeeEntity));
 
-        GetBalanceDto result = companiesService.getEmployeeBalance(companyId, userId);
+        GetBalanceDto result = companiesService.getEmployeeBalance(companyEmail, userId);
 
-        verify(companiesRepo, times(1)).findById(companyId);
+        verify(companiesRepo, times(1)).findByEmail(companyEmail);
         verify(employeesRepo, times(1)).findByIdAndCompany(userId, companyEntity);
 
         assertNotNull(result);

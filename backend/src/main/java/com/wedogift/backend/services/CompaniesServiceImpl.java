@@ -32,8 +32,8 @@ public class CompaniesServiceImpl implements CompaniesService {
 
     private final PasswordEncoder passwordEncoder;
 
-    public static final String NO_COMPANY_WITH_THE_GIVEN_ID_FOUND = "No company with the given id found";
-    public static final String NO_USER_WITH_THE_GIVEN_ID_FOUND = "No employee with the given id found in the company";
+    public static final String NO_COMPANY_WITH_THE_GIVEN_ID_FOUND = "No company found with the given id ";
+    public static final String NO_USER_WITH_THE_GIVEN_ID_FOUND = "No employee found with the given id in the company";
 
     public CompaniesServiceImpl(CompaniesRepo companiesRepo, EmployeesRepo employeesRepo, CompaniesMapper companiesMapper, EmployeesMapper employeesMapper, PasswordEncoder passwordEncoder) {
         this.companiesRepo = companiesRepo;
@@ -61,40 +61,55 @@ public class CompaniesServiceImpl implements CompaniesService {
     }
 
     @Override
-    public DisplayCompanyDto getCompany(UUID companyId) {
-        return this.companiesRepo.findById(companyId).map(companiesMapper::toDto).orElseThrow(() -> new ResourceNotFoundException(NO_COMPANY_WITH_THE_GIVEN_ID_FOUND));
+    public void deleteAllCompanies() {
+        companiesRepo.deleteAll();
     }
 
     @Override
-    public void addEmployeeToCompany(UUID companyId, AddEmployeeDto addEmployee) {
+    public DisplayCompanyDto getCompany(String companyEmail) {
+        return this.companiesRepo.findByEmail(companyEmail).map(companiesMapper::toDto).orElseThrow(() -> new ResourceNotFoundException(NO_COMPANY_WITH_THE_GIVEN_ID_FOUND));
+    }
+    
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        return companiesRepo.findByEmail(username).orElseThrow(() -> new UsernameNotFoundException("username " + username + "not found"));
+    }
+
+    @Override
+    public void addEmployeeToCompany(String companyEmail, AddEmployeeDto addEmployee) {
         //validate employee input
-        CompanyEntity company = this.companiesRepo.findById(companyId).orElseThrow(() -> new ResourceNotFoundException(NO_COMPANY_WITH_THE_GIVEN_ID_FOUND));
+        CompanyEntity company = this.companiesRepo.findByEmail(companyEmail).orElseThrow(() -> new ResourceNotFoundException(NO_COMPANY_WITH_THE_GIVEN_ID_FOUND));
         EmployeeEntity employeeEntity = employeesMapper.toEntity(addEmployee);
         employeeEntity.setCompany(company);
         this.employeesRepo.save(employeeEntity);
-
     }
 
     @Override
-    public List<DisplayEmployeeDto> getCompanyEmplyees(UUID companyId) {
-        CompanyEntity company = this.companiesRepo.findById(companyId).orElseThrow(() -> new ResourceNotFoundException(NO_COMPANY_WITH_THE_GIVEN_ID_FOUND));
+    public List<DisplayEmployeeDto> getCompanyEmplyees(String companyEmail) {
+        CompanyEntity company = this.companiesRepo.findByEmail(companyEmail).orElseThrow(() -> new ResourceNotFoundException(NO_COMPANY_WITH_THE_GIVEN_ID_FOUND));
         return this.employeesRepo.findByCompany(company).stream().map(employeesMapper::toDto).toList();
     }
 
     @Override
-    public DisplayEmployeeDto getCompanyEmployee(UUID companyId, UUID employeeId) {
-        return this.employeesRepo.findById(employeeId).map(this.employeesMapper::toDto).orElseThrow(() -> new ResourceNotFoundException(NO_USER_WITH_THE_GIVEN_ID_FOUND));
+    public DisplayEmployeeDto getCompanyEmployee(String companyEmail, UUID employeeId) {
+        CompanyEntity company = this.companiesRepo.findByEmail(companyEmail).orElseThrow(() -> new ResourceNotFoundException(NO_COMPANY_WITH_THE_GIVEN_ID_FOUND));
+
+        EmployeeEntity employeeEntity = this.employeesRepo.findById(employeeId).orElseThrow(() -> new ResourceNotFoundException(NO_USER_WITH_THE_GIVEN_ID_FOUND));
+        if (employeeEntity.getCompany().getId() != company.getId()) {
+            throw new ResourceNotFoundException("The employee with Id doesn't exists in the company");
+        }
+        return employeesMapper.toDto(employeeEntity);
     }
 
-
     @Override
-    public void depositBalanceToEmployee(UUID companyId, UUID employeeId, DepositBalanceDto depositBalanceDto) {
-        CompanyEntity company = this.companiesRepo.findById(companyId).orElseThrow(() -> new ResourceNotFoundException(NO_COMPANY_WITH_THE_GIVEN_ID_FOUND));
+    public void depositBalanceToEmployee(String companyEmail, UUID employeeId, DepositBalanceDto depositBalanceDto) {
+        CompanyEntity company = this.companiesRepo.findByEmail(companyEmail).orElseThrow(() -> new ResourceNotFoundException(NO_COMPANY_WITH_THE_GIVEN_ID_FOUND));
 
         EmployeeEntity employee = this.employeesRepo.findByIdAndCompany(employeeId, company).orElseThrow(() -> new ResourceNotFoundException(NO_USER_WITH_THE_GIVEN_ID_FOUND));
 
         if (company.getBalance() < depositBalanceDto.balance()) {
-            throw new NotEnoughBalanceException("Not enough balance for company with ID: " + companyId);
+            throw new NotEnoughBalanceException("Not enough balance for company with ID: " + company.getId());
         }
         //Add deposit to employee's deposits
         employee.addDeposit(
@@ -108,12 +123,12 @@ public class CompaniesServiceImpl implements CompaniesService {
         //Update company
         company.setBalance(company.getBalance() - depositBalanceDto.balance());
         companiesRepo.save(company);
+
     }
 
     @Override
-    public GetBalanceDto getEmployeeBalance(UUID companyId, UUID employeeId) {
-
-        CompanyEntity company = this.companiesRepo.findById(companyId).orElseThrow(() -> new ResourceNotFoundException(NO_COMPANY_WITH_THE_GIVEN_ID_FOUND));
+    public GetBalanceDto getEmployeeBalance(String companyEmail, UUID employeeId) {
+        CompanyEntity company = this.companiesRepo.findByEmail(companyEmail).orElseThrow(() -> new ResourceNotFoundException(NO_COMPANY_WITH_THE_GIVEN_ID_FOUND));
 
         EmployeeEntity employee = this.employeesRepo.findByIdAndCompany(employeeId, company).orElseThrow(() -> new ResourceNotFoundException(NO_USER_WITH_THE_GIVEN_ID_FOUND));
         Double employeeBalance = 0D;
@@ -138,12 +153,5 @@ public class CompaniesServiceImpl implements CompaniesService {
             }
         }
         return GetBalanceDto.builder().balance(employeeBalance).build();
-
-
-    }
-
-    @Override
-    public UserDetails loadUserByUsername(String employeename) throws UsernameNotFoundException {
-        return companiesRepo.findByEmail(employeename).orElseThrow(() -> new UsernameNotFoundException("employeename " + employeename + "not found"));
     }
 }

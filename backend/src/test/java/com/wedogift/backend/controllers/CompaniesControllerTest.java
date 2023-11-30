@@ -1,9 +1,7 @@
 package com.wedogift.backend.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.wedogift.backend.dtos.DepositBalanceDto;
-import com.wedogift.backend.dtos.EnumDepositType;
-import com.wedogift.backend.dtos.GetBalanceDto;
+import com.wedogift.backend.dtos.AddCompanyDto;
 import com.wedogift.backend.jwt.JwtProvider;
 import com.wedogift.backend.services.CompaniesService;
 import org.junit.jupiter.api.Test;
@@ -11,21 +9,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-import java.time.LocalDate;
-import java.util.List;
 import java.util.UUID;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(CompaniesController.class)
@@ -44,69 +37,26 @@ class CompaniesControllerTest {
 
 
     @Test
-    void depositUserBalance() throws Exception {
-        UUID companyId = UUID.randomUUID();
-        UUID employeeId = UUID.randomUUID();
-        DepositBalanceDto depositBalanceDto = DepositBalanceDto.builder().depositDate(LocalDate.now()).balance(50.0).enumDepositType(EnumDepositType.GIFTS).build();
-
+    void addCompany() throws Exception {
+        //Given
+        AddCompanyDto addCompanyDto = AddCompanyDto.builder().email("company@wedoostore.com")
+                .name("company").balance(50.1).password("testttt").build();
         String jwtToken = "fake";
 
-        RequestBuilder requestBuilder = MockMvcRequestBuilders
-                .post("/api/v1/companies/{companyId}/employees/{employeeId}/deposit", companyId, employeeId)
-                .with(jwt().authorities(List.of(new SimpleGrantedAuthority("ROLE_USER"))).jwt(builder -> builder.tokenValue("test").header("Authorization Bearer ", "test")))
-                .content(objectMapper.writeValueAsString(depositBalanceDto))
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON);
-
-        mockMvc.perform(requestBuilder)
-                .andExpect(status().isNoContent());
-
-    }
-
-    @Test
-    void depositUserBalance_WithInvalidInput_SHouldReturn400() throws Exception {
-        //Given
-        UUID companyId = UUID.randomUUID();
-        UUID employeeId = UUID.randomUUID();
-        DepositBalanceDto depositBalanceDto = DepositBalanceDto.builder().balance(50.0).enumDepositType(EnumDepositType.GIFTS).build();
-        String jwtToken = "FAKE";
-        RequestBuilder requestBuilder = MockMvcRequestBuilders
-                .post("/api/v1/companies/{companyId}/employees/{employeeId}/deposit", companyId, employeeId)
-                .with(jwt().authorities(List.of(new SimpleGrantedAuthority("ROLE_USER"))).jwt(builder -> builder.tokenValue("test").header("Authorization Bearer ", "test")))
-
-                .content(objectMapper.writeValueAsString(depositBalanceDto))
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON);
-
+        //When
+        when(companiesService.addCompany(any())).thenReturn(UUID.randomUUID());
+        when(jwtProvider.issueToken(anyString(), anyString())).thenReturn(jwtToken);
 
         //Then
-        mockMvc.perform(requestBuilder)
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void getUserBalance() throws Exception {
-        UUID companyId = UUID.randomUUID();
-        UUID employeeId = UUID.randomUUID();
-        GetBalanceDto getBalanceDto = GetBalanceDto.builder().balance(50.0).build();
-
-        when(companiesService.getEmployeeBalance(companyId, employeeId)).thenReturn(getBalanceDto);
-
-        Object jwtToken = "FAKE";
         RequestBuilder requestBuilder = MockMvcRequestBuilders
-                .get("/api/v1/companies/{companyId}/employees/{employeeId}/balance", companyId, employeeId)
-                .accept(MediaType.APPLICATION_JSON)
-                .with(jwt().authorities(List.of(new SimpleGrantedAuthority("ROLE_USER"))).jwt(builder -> builder.tokenValue("test").header("Authorization Bearer ", "test")));
+                .post("/api/v1/companies")
+                .with(jwt())
+                .content(objectMapper.writeValueAsString(addCompanyDto))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON);
 
-        MvcResult mvcResult = mockMvc.perform(requestBuilder)
-                .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$").isMap()).andReturn();
-
-        String actualResponseBody = mvcResult.getResponse().getContentAsString();
-        assertThat(actualResponseBody).isEqualToIgnoringWhitespace(
-                objectMapper.writeValueAsString(getBalanceDto));
-
+        mockMvc.perform(requestBuilder)
+                .andExpect(status().isCreated());
 
     }
 }

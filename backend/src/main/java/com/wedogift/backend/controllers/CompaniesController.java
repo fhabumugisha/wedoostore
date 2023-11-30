@@ -1,6 +1,7 @@
 package com.wedogift.backend.controllers;
 
-import com.wedogift.backend.dtos.*;
+import com.wedogift.backend.dtos.AddCompanyDto;
+import com.wedogift.backend.dtos.DisplayCompanyDto;
 import com.wedogift.backend.jwt.JwtProvider;
 import com.wedogift.backend.services.CompaniesService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.security.Principal;
 import java.util.List;
 import java.util.UUID;
 
@@ -38,7 +40,7 @@ public class CompaniesController {
             description = "Add a new company in the wedoogift service",
             tags = {"Company-API"})
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "successful operation"),
+            @ApiResponse(responseCode = "201", description = "successful operation"),
             @ApiResponse(responseCode = "400", description = "Invalid parameters",
                     content = @Content),
     })
@@ -73,90 +75,9 @@ public class CompaniesController {
             @ApiResponse(responseCode = "404", description = "Company not found",
                     content = @Content),
     })
-    @GetMapping("{companyId}")
-    public ResponseEntity<DisplayCompanyDto> getCompany(@Parameter(name = "companyId", description = "companyId") @PathVariable UUID companyId) {
-        return ResponseEntity.ok(companiesService.getCompany(companyId));
-    }
-
-
-    @Operation(summary = "Add a new employee to a company",
-            description = "Add a new employee to a company in the wedoogift service",
-            tags = {"Company-API"})
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "successful operation"),
-            @ApiResponse(responseCode = "400", description = "Invalid parameters",
-                    content = @Content),
-            @ApiResponse(responseCode = "404", description = "Company not found",
-                    content = @Content),
-    })
-    @PostMapping("{companyId}/employees")
-    public ResponseEntity<?> addEmployeeToCompany(@Parameter(name = "companyId", description = "companyId") @PathVariable UUID companyId,
-                                                  @Parameter(name = "employeeDto") @Valid @RequestBody AddEmployeeDto employeeDto) {
-        companiesService.addEmployeeToCompany(companyId, employeeDto);
-        return ResponseEntity.noContent().build();
-    }
-
-    @Operation(summary = "Returns the employees of a company", description = "Returns the list of employees of company", tags = {"Company-API"})
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "successful operation",
-                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = List.class)))),
-            @ApiResponse(responseCode = "404", description = "Company not found",
-                    content = @Content),
-    })
-    @GetMapping("{companyId}/employees")
-    public ResponseEntity<List<DisplayEmployeeDto>> getCompanyEmployees(@Parameter(name = "companyId", description = "companyId")
-                                                                        @PathVariable UUID companyId) {
-        return ResponseEntity.ok(companiesService.getCompanyEmplyees(companyId));
-    }
-
-    @Operation(summary = "Get employee of a company by Id",
-            description = "Returns the employee ",
-            tags = {"Company-API"})
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "successful operation",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = DisplayEmployeeDto.class))),
-            @ApiResponse(responseCode = "404", description = "Company not found",
-                    content = @Content),
-    })
-    @GetMapping("{companyId}/employees/{employeeId}")
-    public ResponseEntity<DisplayEmployeeDto> getCompanyEmployee(@Parameter(name = "companyId", description = "companyId")
-                                                                 @PathVariable UUID companyId,
-                                                                 @Parameter(name = "employeeId", description = "employeeId")
-                                                                 @PathVariable UUID employeeId) {
-        return ResponseEntity.ok(companiesService.getCompanyEmployee(companyId, employeeId));
-    }
-
-
-    @Operation(summary = "Add a new balance to a employee of a company",
-            description = "Add a new balance to a employee of a company",
-            tags = {"Company-API"})
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "successful operation"),
-            @ApiResponse(responseCode = "404", description = "Company not found",
-                    content = @Content),
-            @ApiResponse(responseCode = "400", description = "Invalid parameters",
-                    content = @Content),
-    })
-    @PostMapping("{companyId}/employees/{employeeId}/deposit")
-    public ResponseEntity<Void> depositEmployeeBalance(@Parameter(name = "companyId", description = "companyId") @PathVariable UUID companyId,
-                                                       @Parameter(name = "employeeId", description = "employeeId") @PathVariable UUID employeeId,
-                                                       @Parameter(name = "depositBalanceDto") @Valid @RequestBody DepositBalanceDto depositBalanceDto) {
-        companiesService.depositBalanceToEmployee(companyId, employeeId, depositBalanceDto);
-        return ResponseEntity.noContent().build();
-    }
-
-
-    @Operation(summary = "Get employee balance",
-            description = "Returns the employee balance",
-            tags = {"Company-API"})
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "successful operation"),
-            @ApiResponse(responseCode = "404", description = "Company not found",
-                    content = @Content),
-    })
-    @GetMapping("{companyId}/employees/{employeeId}/balance")
-    public ResponseEntity<GetBalanceDto> getEmployeeBalance(@PathVariable UUID companyId, @PathVariable UUID employeeId) {
-        return ResponseEntity.ok(companiesService.getEmployeeBalance(companyId, employeeId));
+    @GetMapping("/me")
+    public ResponseEntity<DisplayCompanyDto> getCompany(Principal principal) {
+        return ResponseEntity.ok(companiesService.getCompany(principal.getName()));
     }
 
 
