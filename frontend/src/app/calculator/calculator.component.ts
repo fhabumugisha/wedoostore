@@ -1,5 +1,5 @@
 import {Component, inject, signal} from '@angular/core';
-import { CommonModule } from '@angular/common';
+import {CommonModule} from '@angular/common';
 import {FormBuilder, FormsModule, ReactiveFormsModule, Validators} from "@angular/forms";
 import {CalculatorService} from "./calculator.service";
 import {CalculationResponse} from "./models/calculation-response";
@@ -7,13 +7,15 @@ import {ValueCard} from "./models/value-card";
 import {CalculatorValueFormGroup} from "./models/calculator-value-form-group";
 import {MatButtonModule} from "@angular/material/button";
 import {MatIconModule} from "@angular/material/icon";
+import {MatCardModule} from "@angular/material/card";
+import {MatInputModule} from "@angular/material/input";
 
 @Component({
   selector: 'app-calculator',
   standalone: true,
   templateUrl: './calculator.component.html',
   styleUrl: './calculator.component.scss',
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, MatButtonModule, MatIconModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, MatButtonModule, MatIconModule, MatCardModule, MatInputModule],
 
 })
 export class CalculatorComponent {
@@ -72,23 +74,23 @@ export class CalculatorComponent {
   }
 
   getPrevious() {
-    this.defaultAmount.update((oldValue) => oldValue - 1) ;
+    this.defaultAmount.update((oldValue) => oldValue - 1);
     this.processNextValues(false);
   }
 
 
-
   getNext() {
-    this.defaultAmount.update((oldValue) => oldValue + 1) ;
+    this.defaultAmount.update((oldValue) => oldValue + 1);
     this.processNextValues(true);
 
   }
-  private processNextValues(isNext:boolean) {
+
+  private processNextValues(isNext: boolean) {
     this.calculateService.calculate(this.defaultAmount()).subscribe({
       next: data => {
         if (!isNext && data.floor) {
           this.setValue(data.floor.value);
-        }else if(isNext && data.ceil){
+        } else if (isNext && data.ceil) {
           this.setValue(data.ceil.value);
         }
       },
