@@ -2,10 +2,10 @@ package com.wedogift.backend.controllers;
 
 import com.wedogift.backend.dtos.AddCompanyDto;
 import com.wedogift.backend.dtos.DisplayCompanyDto;
+import com.wedogift.backend.dtos.DisplayEmployeeDto;
 import com.wedogift.backend.jwt.JwtProvider;
 import com.wedogift.backend.services.CompaniesService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -42,10 +42,10 @@ public class CompaniesController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "successful operation"),
             @ApiResponse(responseCode = "400", description = "Invalid parameters",
-                    content = @Content),
+                    content = @Content(schema = @Schema())),
     })
     @PostMapping
-    public ResponseEntity<String> addCompany(@Valid @Parameter(name = "companyDto")
+    public ResponseEntity<String> addCompany(@Valid
                                              @RequestBody AddCompanyDto companyDto) {
         UUID id = companiesService.addCompany(companyDto);
         URI location = ServletUriComponentsBuilder
@@ -57,10 +57,11 @@ public class CompaniesController {
         return ResponseEntity.created(location).header(HttpHeaders.AUTHORIZATION, token).build();
     }
 
-    @Operation(summary = "Returns a list of companies", description = "Returns the list of companies using wedoogift service", tags = {"Company-API"})
+    @Operation(summary = "Returns a list of companies",
+            description = "Returns the list of companies using wedoogift service", tags = {"Company-API"})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "successful operation",
-                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = List.class))))
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = DisplayEmployeeDto.class))))
     })
     @GetMapping
     public ResponseEntity<List<DisplayCompanyDto>> getAllCompanies() {
@@ -73,7 +74,7 @@ public class CompaniesController {
             @ApiResponse(responseCode = "200", description = "successful operation",
                     content = @Content(mediaType = "application/json", schema = @Schema(implementation = DisplayCompanyDto.class))),
             @ApiResponse(responseCode = "404", description = "Company not found",
-                    content = @Content),
+                    content = @Content(schema = @Schema())),
     })
     @GetMapping("/me")
     public ResponseEntity<DisplayCompanyDto> getCompany(Principal principal) {
