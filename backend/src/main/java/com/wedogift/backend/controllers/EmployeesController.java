@@ -43,11 +43,11 @@ public class EmployeesController {
             @ApiResponse(responseCode = "400", description = "Invalid parameters",
                     content = @Content),
             @ApiResponse(responseCode = "404", description = "Company not found",
-                    content = @Content),
+                    content = @Content()),
     })
     @PostMapping("")
     public ResponseEntity<?> addEmployeeToCompany(Principal principal,
-                                                  @Parameter(name = "employeeDto") @Valid @RequestBody AddEmployeeDto employeeDto) {
+                                                  @Valid @RequestBody AddEmployeeDto employeeDto) {
         companiesService.addEmployeeToCompany(principal.getName(), employeeDto);
         return ResponseEntity.noContent().build();
     }
@@ -56,9 +56,9 @@ public class EmployeesController {
             description = "Returns the list of employees of company", tags = {"Employee-API"})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "successful operation",
-                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = List.class)))),
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = DisplayEmployeeDto.class)))),
             @ApiResponse(responseCode = "404", description = "Employee not found",
-                    content = @Content),
+                    content = @Content(schema = @Schema())),
     })
     @GetMapping("")
     public ResponseEntity<List<DisplayEmployeeDto>> getCompanyEmployees(Principal principal) {
@@ -77,7 +77,7 @@ public class EmployeesController {
     })
     @GetMapping("{employeeId}")
     public ResponseEntity<DisplayEmployeeDto> getCompanyEmployee(Principal principal,
-                                                                 @Parameter(name = "employeeId", description = "employeeId")
+                                                                 @Parameter(description = "employeeId")
                                                                  @PathVariable UUID employeeId) {
         return ResponseEntity.ok(companiesService.getCompanyEmployee(principal.getName(), employeeId));
     }
@@ -89,14 +89,14 @@ public class EmployeesController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "successful operation"),
             @ApiResponse(responseCode = "404", description = "employee not found",
-                    content = @Content),
+                    content = @Content(schema = @Schema())),
             @ApiResponse(responseCode = "400", description = "Invalid parameters",
-                    content = @Content),
+                    content = @Content(schema = @Schema())),
     })
     @PostMapping("{employeeId}/deposit")
     public ResponseEntity<Void> depositEmployeeBalance(Principal principal,
-                                                       @Parameter(name = "employeeId", description = "employeeId") @PathVariable UUID employeeId,
-                                                       @Parameter(name = "depositBalanceDto") @Valid @RequestBody DepositBalanceDto depositBalanceDto) {
+                                                       @Parameter(description = "employeeId") @PathVariable UUID employeeId,
+                                                       @Valid @RequestBody DepositBalanceDto depositBalanceDto) {
         companiesService.depositBalanceToEmployee(principal.getName(), employeeId, depositBalanceDto);
         return ResponseEntity.noContent().build();
     }

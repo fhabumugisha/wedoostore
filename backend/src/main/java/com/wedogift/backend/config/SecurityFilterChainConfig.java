@@ -11,6 +11,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @Configuration
 @EnableWebSecurity
@@ -31,7 +32,10 @@ public class SecurityFilterChainConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "/api/v1/companies").permitAll()
-                        .requestMatchers("/swagger-ui/**", "/api-docs.yaml", "/api-docs/**").permitAll()
+                        .requestMatchers(AntPathRequestMatcher.antMatcher("/swagger-ui/**"),
+                                AntPathRequestMatcher.antMatcher("/api-docs.yaml"),
+                                AntPathRequestMatcher.antMatcher("/v3/api-docs/**")
+                        ).permitAll()
                         .anyRequest().authenticated()
 
                 ).sessionManagement(sessionManagement -> sessionManagement
