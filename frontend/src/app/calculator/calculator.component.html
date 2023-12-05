@@ -1,42 +1,50 @@
+<div class="bg-gray-100 min-h-screen flex items-center justify-center flex-col">
+  <mat-card class="w-full max-w-2xl p-6 flex">
 
+    <div class="flex flex-col items-center mt-16 font-large">
+      <h1 class="bg-red-600 text-white p-4 rounded-md shadow-md">Cartes cadeaux</h1>
 
+      <form [formGroup]="calculatorForm" (ngSubmit)="calculate()" class="flex flex-col items-center p-4 border-1 border-solid border-gray-600 rounded-md shadow-md">
+        <label class="mb-2">Montant désiré:</label>
+        <input id="name" type="text" formControlName="amount" matInput class="p-2 mb-4 border border-gray-400 rounded">
 
+        <button type="submit" [disabled]="!calculatorForm.valid" class="p-2 bg-red-600 text-white border-none rounded-md cursor-pointer">Valider</button>
+      </form>
 
-<div class="container">
-  <h1>Cartes cadeaux</h1>
-  <form [formGroup]="calculatorForm" (ngSubmit)="calculate()">
-    <label>Montant désiré:</label>
-    <input id="name" type="text" formControlName="amount">
-    <button type="submit" [disabled]="!calculatorForm.valid">Valider</button>
-  </form>
+      <div class="flex items-center space-x-4 mt-4">
+        <button class="card-item bg-cyan-600"  type="button" title="Previous amount" (click)="getPrevious()">-</button>
+        <button class="card-item bg-cyan-600" type="button" title="Next amount" (click)="getNext()">+</button>
+      </div>
 
-  <div>
-
-    <button  class="card-item" type="button" title="Previous amount"  (click)="getPrevious()">-</button>
-    <button  class="card-item" type="button" title="next amount"  (click)="getNext()">+</button>
-  </div>
-  <div class="p20">
-    @if (!showNextValue() && availableCards ){
-    <h2 style="color: darkgreen">Votre montant est composé des cartes suivantes :</h2>
-    <ul class="card-list" *ngFor="let card of availableCards!.cards">
-      <li class="card-item">
-        {{ card }} €
+      <div >
+        @if (!showNextValue() && availableCards ) {
+        <h2 class="text-green">Votre montant est composé des cartes suivantes :</h2>
+        <ul class="card-list">
+          @for (card of availableCards!.cards; track card) {
+            <li class="card-item bg-green-500 text-white">
+               {{ card }} €
+           </li>
+          }
+       </ul>
+        }
+        @if (showNextValue()){
+        <h2 class="text-salmon">Le montant saisi n'est pas disponible, Veuillez choisir un autre montant ci-dessous :</h2>
+        <ul class="card-list">
+          <li class="card-item bg-red-500 text-white">
+            <button type="button"  (click)="setValue(ceilValue)">{{ceilValue }} € </button>
+      </li>
+      <li class="card-item bg-red-500 text-white">
+        <button type="button" (click)="setValue(floorValue)"> {{floorValue }} € </button>
       </li>
     </ul>
-  }
-    @if (showNextValue()){
-    <h2 style="color: salmon">Le montant saisi n'est pas disponible, Veullez choisir un autre montant ci-desous :</h2>
-    <ul class="card-list">
-      <li class="card-item">
-        <button type="button" (click)="setValue(ceilValue)">{{ceilValue }} € </button>
-        </li>
-        <li class="card-item" >
-          <button type="button" (click)="setValue(floorValue)"> {{floorValue }} € </button>
-        </li>
-      </ul>
-    }
+        }
+      </div>
+    </div>
 
-  </div>
+  </mat-card>
 </div>
+
+
+
 
 
