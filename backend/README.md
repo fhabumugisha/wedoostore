@@ -27,6 +27,7 @@ Avec Swagger-Ui ou Postman
 #### Collection postman
 
 [Wedoogift API.postman_collection.json](Wedoogift%20API.postman_collection.json)
+![Collection_postman.PNG](Collection_postman.PNG)
 
 # Wedoogift Backend challenge
 
