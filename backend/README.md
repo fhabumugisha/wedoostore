@@ -1,5 +1,7 @@
 # Documentation
 
+Le service WedooStore est implementé avec Spring Boot 3, Java 17, PostGreSql . Ce service fourni des APIS REST.
+
 ### Architecture
 
 ![Architecture.drawio.png](Architecture.drawio.png)
